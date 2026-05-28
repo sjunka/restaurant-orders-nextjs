@@ -27,7 +27,7 @@ export function NavBar() {
           >
             Cart
             {itemCount > 0 && (
-              <span className="absolute -top-1.5 -right-3.5 bg-orange-500 text-white text-xs flex items-center justify-center rounded-full min-w-[18px] px-1">
+              <span className="absolute -top-1.5 -right-3.5 bg-orange-500 text-white text-xs flex items-center justify-center rounded-full min-w-4.5 px-1">
                 {itemCount}
               </span>
             )}
