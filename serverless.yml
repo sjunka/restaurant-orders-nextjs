@@ -1,0 +1,35 @@
+service: restaurant-ordering
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL, 'file:./dev.db'}
+    NEXT_PUBLIC_MOCK_USER_ID: ${env:NEXT_PUBLIC_MOCK_USER_ID, 'user-mock-001'}
+    TAX_RATE: ${env:TAX_RATE, '0.08'}
+    SERVICE_FEE_CENTS: ${env:SERVICE_FEE_CENTS, '150'}
+
+plugins:
+  - serverless-offline
+
+functions:
+  next:
+    handler: serverless/handler.handler
+    events:
+      - httpApi:
+          path: /
+          method: ANY
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+    noPrependStageInUrl: true
+
+# Primary local dev is `npm run dev` (Next.js dev server, port 3000).
+# `npm run sls:offline` starts the same app behind serverless-offline on port 4000
+# for CI / staging parity with the production Lambda packaging.

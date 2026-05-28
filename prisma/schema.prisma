@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// A menu item. modifierGroups is stored as JSON because its structure
+// is complex and varies per product (protein choices, toppings, sauces…).
+model Product {
+  id               String  @id
+  name             String
+  description      String
+  basePriceInCents Int
+  category         String
+  imageUrl         String?
+  modifierGroups   String  // JSON – ModifierGroup[]
+}
+
+// A placed order. Items live in the related OrderItem table.
+model Order {
+  id              String   @id @default(uuid())
+  userId          String
+  correlationId   String
+  status          String   @default("PENDING")
+  subtotalCents   Int
+  taxCents        Int
+  serviceFeeCents Int
+  totalCents      Int
+  idempotencyKey  String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items  OrderItem[]
+  events TimelineEvent[]
+}
+
+// One line-item of an order. modifiers is a JSON snapshot captured at
+// checkout – it should never be mutated after creation.
+model OrderItem {
+  id               String @id @default(uuid())
+  orderId          String
+  productId        String
+  name             String
+  basePriceInCents Int
+  modifiers        String // JSON – SelectedModifier[]
+  quantity         Int
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+// Append-only event log. eventId is supplied by the caller so that a
+// re-delivered event can be idempotently ignored.
+model TimelineEvent {
+  eventId       String   @id
+  timestamp     DateTime
+  orderId       String?
+  userId        String
+  type          String
+  source        String
+  correlationId String
+  payload       String   // JSON – arbitrary event data (PII already masked)
+
+  order Order? @relation(fields: [orderId], references: [id])
+}
+
+// Tracks checkout idempotency keys so retried POST /orders calls return
+// the same orderId without creating a duplicate order.
+model IdempotencyRecord {
+  key       String   @id
+  response  String   // JSON
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
