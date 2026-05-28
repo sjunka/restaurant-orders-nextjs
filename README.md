@@ -100,12 +100,15 @@ npm run sls:offline   # boots serverless-offline on http://localhost:4000
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Start the app |
+| `npm run dev` | Start the app (Next.js dev server, http://localhost:3000) |
+| `npm run build` | Produce the Next.js production build |
+| `npm run sls:offline` | Run the app behind `serverless-offline` (http://localhost:4000) — requires a prior `npm run build` |
 | `npm run seed` | Reload the 7 menu items |
 | `npm run db:push` | Sync schema changes to the database |
 | `npm run db:studio` | Open a visual database browser |
 | `npm test` | Run all tests |
 | `npm run type-check` | Check TypeScript |
+| `npm run lint` | Run ESLint over `src/` |
 
 ---
 
